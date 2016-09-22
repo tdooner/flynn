@@ -17,7 +17,7 @@ resource "digitalocean_droplet" "flynn-master" {
 
   provisioner "remote-exec" {
     inline = [
-      "curl -fsSL https://dl.flynn.io/install-flynn -- --version v20160814.0 | bash",
+      "curl -fsSL https://dl.flynn.io/install-flynn | bash -s -- --version v20160814.0",
     ]
   }
 }
