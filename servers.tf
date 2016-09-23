@@ -1,3 +1,15 @@
+variable "mailgun_api_key" {}
+variable "mailgun_smtp_password" {}
+
+provider "mailgun" {
+  api_key = "${var.mailgun_api_key}"
+}
+
+resource "mailgun_domain" "sciolyreg" {
+  name = "sciolyreg.org"
+  smtp_password = "${var.mailgun_smtp_password}"
+}
+
 resource "digitalocean_ssh_key" "flynn" {
   name = "DigitalOcean Terraform Flynn"
   public_key = "${trimspace(file("~/.ssh/flynn.pub"))}"
@@ -60,6 +72,21 @@ resource "cloudflare_record" "sciolyreg-wildcard" {
   value = "f.tdooner.com"
   type = "CNAME"
   ttl = 120
+}
+
+# this could be wrong in the future if mailgun changes; but for now variables
+# are not permitted in count arguments.
+resource "cloudflare_record" "sciolyreg-sending-records-0" {
+  domain = "sciolyreg.org"
+  value = "${mailgun_domain.sciolyreg.sending_records.0.value}"
+  name = "${coalesce(replace(mailgun_domain.sciolyreg.sending_records.0.name, "/(.)?sciolyreg.org/", ""), "@")}"
+  type = "${mailgun_domain.sciolyreg.sending_records.0.record_type}"
+}
+resource "cloudflare_record" "sciolyreg-sending-records-1" {
+  domain = "sciolyreg.org"
+  value = "${mailgun_domain.sciolyreg.sending_records.1.value}"
+  name = "${coalesce(replace(mailgun_domain.sciolyreg.sending_records.1.name, ".sciolyreg.org", ""), "@")}"
+  type = "${mailgun_domain.sciolyreg.sending_records.1.record_type}"
 }
 
 output "master-ip" {
