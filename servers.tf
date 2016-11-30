@@ -1,5 +1,6 @@
 variable "mailgun_api_key" {}
 variable "mailgun_smtp_password" {}
+variable "statuscake_api_key" {}
 
 provider "mailgun" {
   api_key = "${var.mailgun_api_key}"
@@ -7,6 +8,11 @@ provider "mailgun" {
 
 provider "aws" {
   region = "us-west-2"
+}
+
+provider "statuscake" {
+  username = "tomdooner"
+  apikey = "${var.statuscake_api_key}"
 }
 
 resource "mailgun_domain" "sciolyreg" {
@@ -168,6 +174,25 @@ resource "cloudflare_record" "sciolyreg-sending-records-1" {
   value = "${mailgun_domain.sciolyreg.sending_records.1.value}"
   name = "${coalesce(replace(mailgun_domain.sciolyreg.sending_records.1.name, ".sciolyreg.org", ""), "@")}"
   type = "${mailgun_domain.sciolyreg.sending_records.1.record_type}"
+}
+
+# status checks for services
+resource "statuscake_test" "sciolyreg" {
+  website_name = "sciolyreg.org"
+  website_url = "${cloudflare_record.sciolyreg.domain}"
+  test_type = "HTTP"
+}
+
+resource "statuscake_test" "citymixtape" {
+  website_name = "citymixtape.com"
+  website_url = "${cloudflare_record.citymixtape.domain}"
+  test_type = "HTTP"
+}
+
+resource "statuscake_test" "disclosure-backend" {
+  website_name = "disclosure-backend-static.tdooner.com"
+  website_url = "disclosure-backend-static.tdooner.com"
+  test_type = "HTTP"
 }
 
 output "master-ip" {
