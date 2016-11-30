@@ -146,6 +146,15 @@ resource "cloudflare_record" "sciolyreg-wildcard" {
   ttl = 120
 }
 
+resource "cloudflare_record" "disclosure-backend-static" {
+  domain = "tdooner.com"
+  name = "disclosure-backend-static"
+  value = "f.tdooner.com"
+  type = "CNAME"
+  ttl = 120
+  proxied = true
+}
+
 # this could be wrong in the future if mailgun changes; but for now variables
 # are not permitted in count arguments.
 resource "cloudflare_record" "sciolyreg-sending-records-0" {
