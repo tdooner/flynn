@@ -1,0 +1,26 @@
+#!/bin/bash
+set -euo pipefail
+
+if [ $# != 1 ]; then
+  echo "usage: ${0} [backup]"
+fi
+
+backup_name=$1
+export AWS_ACCESS_KEY_ID=$(cat ~backups/.s3_access_key_id)
+export AWS_SECRET_ACCESS_KEY=$(cat ~backups/.s3_secret_access_key)
+
+tmpfile=$(mktemp)
+trap "rm -rf $tmpfile" EXIT
+
+echo "Downloading backup into $tmpfile..."
+gof3r get --endpoint s3-us-west-2.amazonaws.com -b flynn-backups-tdooner -k $backup_name >$tmpfile
+
+# TODO: we will need this on three node clusters
+# echo "Initializing cluster discovery..."
+# discovery=$(flynn-host init --init-discovery)
+
+echo "Starting flynn-host..."
+systemctl start flynn-host
+
+echo "Bootstrapping new flynn cluster"
+flynn-host bootstrap --min-hosts 1 --from-backup "$tmpfile"

@@ -1,0 +1,10 @@
+#!/bin/bash
+# Takes a backup of the default flynn server
+# usage:   ./bin/take-backup [destination]
+# default: ./bin/take-backup backups/backup-$(date +%s).tar
+
+set -euo pipefail
+host=$(terraform output master-ip)
+
+echo "Connecting to ${host}..."
+ssh -t -i ~/.ssh/flynn root@${host} bash -c "echo 'Connected! Starting...'; sleep 1; exec /usr/local/bin/take-backup"

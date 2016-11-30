@@ -5,6 +5,10 @@ provider "mailgun" {
   api_key = "${var.mailgun_api_key}"
 }
 
+provider "aws" {
+  region = "us-west-2"
+}
+
 resource "mailgun_domain" "sciolyreg" {
   name = "sciolyreg.org"
   smtp_password = "${var.mailgun_smtp_password}"
@@ -16,10 +20,10 @@ resource "digitalocean_ssh_key" "flynn" {
 }
 
 resource "digitalocean_droplet" "flynn-master" {
-  image = "ubuntu-14-04-x64"
-  name = "flynn-master"
+  image = "ubuntu-16-04-x64"
+  name = "flynn-master-2016-11"
   region = "sfo2"
-  size = "2gb"
+  size = "4gb"
   ssh_keys = ["${digitalocean_ssh_key.flynn.fingerprint}"]
 
   connection {
@@ -29,9 +33,77 @@ resource "digitalocean_droplet" "flynn-master" {
 
   provisioner "remote-exec" {
     inline = [
-      "curl -fsSL https://dl.flynn.io/install-flynn | bash -s -- --version v20160814.0",
+      "curl -fsSL https://dl.flynn.io/install-flynn | bash -s -- --version v20161114.0p1",
     ]
   }
+
+  provisioner "file" {
+    source = "take-backup"
+    destination = "/usr/local/bin/take-backup"
+  }
+
+  provisioner "file" {
+    source = "restore-backup"
+    destination = "/usr/local/bin/restore-backup"
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      <<EOF
+wget -O- --quiet https://github.com/rlmcpherson/s3gof3r/releases/download/v0.5.0/gof3r_0.5.0_linux_amd64.tar.gz |
+  tar xz -C /usr/local/bin --strip-components=1 &&
+chmod +x /usr/local/bin/gof3r &&
+useradd backups -m &&
+echo "${aws_iam_access_key.flynn-backups.id}" > ~backups/.s3_access_key_id &&
+echo "${aws_iam_access_key.flynn-backups.secret}" > ~backups/.s3_secret_access_key &&
+chmod +x /usr/local/bin/take-backup /usr/local/bin/restore-backup
+EOF
+    ]
+  }
+}
+
+resource "aws_iam_policy" "flynn-backups" {
+  name = "flynn-backups"
+  path = "/"
+  description = "User to upload flynn backups"
+  policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "Stmt1480272378109",
+      "Action": [
+        "s3:DeleteObject",
+        "s3:GetObject",
+        "s3:ListBucket",
+        "s3:PutObject"
+      ],
+      "Effect": "Allow",
+      "Resource": "arn:aws:s3:::${aws_s3_bucket.flynn-backups.bucket}/*"
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_iam_user" "flynn-backups" {
+  name = "flynn-backups"
+  path = "/"
+}
+
+resource "aws_iam_policy_attachment" "flynn-backups" {
+  name = "flynn-backups"
+  users = ["${aws_iam_user.flynn-backups.name}"]
+  policy_arn = "${aws_iam_policy.flynn-backups.arn}"
+}
+
+resource "aws_iam_access_key" "flynn-backups" {
+  user = "${aws_iam_user.flynn-backups.name}"
+}
+
+resource "aws_s3_bucket" "flynn-backups" {
+  bucket = "flynn-backups-tdooner"
+  acl = "private"
 }
 
 resource "cloudflare_record" "flynn-cluster" {
