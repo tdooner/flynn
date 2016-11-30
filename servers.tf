@@ -66,6 +66,15 @@ chmod +x /usr/local/bin/take-backup /usr/local/bin/restore-backup
 EOF
     ]
   }
+
+  provisioner "remote-exec" {
+    inline = [
+      "fallocate -l 4G /mnt/swap",
+      "mkswap /mnt/swap",
+      "chmod 0600 /mnt/swap",
+      "swapon /mnt/swap"
+    ]
+  }
 }
 
 resource "aws_iam_policy" "flynn-backups" {
