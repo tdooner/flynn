@@ -4,7 +4,7 @@
 # default: ./bin/take-backup backups/backup-$(date +%s).tar
 
 set -euo pipefail
-host=$(terraform output master-ip)
+host=$(terraform output -module=flynn-master master-ip)
 
 echo "Connecting to ${host}..."
 ssh -t -i ~/.ssh/flynn root@${host} bash -c "echo 'Connected! Starting...'; sleep 1; exec /usr/local/bin/take-backup"

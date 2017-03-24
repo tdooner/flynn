@@ -1,10 +1,12 @@
 #!/bin/bash
 set -euo pipefail
 
+export CLUSTER_DOMAIN=f.tdooner.com
+
 backup_name=backup-$(date +%Y-%m-%d-%H-%M-%S).tar.gz
 controller_id=$(flynn-host ps -f '{{.Job.ID}} {{metadata "flynn-controller.app_name"}}' -q | grep controller | head -n 1 | cut -d ' ' -f 1)
 controller_token=$(flynn-host inspect $controller_id | grep AUTH_KEY | awk '{ print $2 }')
-tlspin=$(cat /root/cert.pem | openssl x509 -inform PEM -outform DER | openssl dgst -binary -sha256 | openssl base64)
+tlspin=$(openssl s_client -connect controller.$CLUSTER_DOMAIN:443 -servername controller.$CLUSTER_DOMAIN 2>/dev/null </dev/null | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | openssl x509 -inform PEM -outform DER | openssl dgst -binary -sha256 | openssl base64)
 export AWS_ACCESS_KEY_ID=$(cat ~backups/.s3_access_key_id)
 export AWS_SECRET_ACCESS_KEY=$(cat ~backups/.s3_secret_access_key)
 flynn cluster add -f --no-git -p "$tlspin" default f.tdooner.com "$controller_token"
