@@ -36,9 +36,11 @@ resource "cloudflare_record" "sciolyreg-sending-records-1" {
   type = "${mailgun_domain.sciolyreg.sending_records.1.record_type}"
 }
 
-resource "statuscake_test" "sciolyreg" {
-  website_name = "sciolyreg.org"
-  website_url = "${cloudflare_record.sciolyreg.domain}"
-  test_type = "HTTP"
-}
+module "sciolyreg_status_check" {
+  source = "../aws-status-check"
 
+  fqdn = "ohiostate.sciolyreg.org"
+  type = "HTTP"
+  port = 80
+  sns_arn = "arn:aws:sns:us-east-1:428663493796:downtime-alerts"
+}
