@@ -33,6 +33,7 @@ resource "aws_route53_health_check" "check" {
   type = "${var.type}"
   failure_threshold = "1" # TODO: bump this up to 5
   request_interval = "30"
+  resource_path = "/"
 
   tags = {
     Name = "${var.fqdn}"
