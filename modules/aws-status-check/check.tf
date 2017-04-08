@@ -4,11 +4,6 @@ variable "type" {}
 variable "port" {}
 variable "sns_arn" {}
 
-provider "aws" {
-  region = "us-east-1"
-  alias = "east"
-}
-
 resource "aws_cloudwatch_metric_alarm" "check" {
   metric_name = "HealthCheckStatus"
   comparison_operator = "LessThanThreshold"

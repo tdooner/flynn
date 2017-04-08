@@ -9,6 +9,11 @@ provider "aws" {
   region = "us-west-2"
 }
 
+provider "aws" {
+  alias = "east"
+  region = "us-east-1"
+}
+
 module "flynn-master" {
   source = "./modules/flynn-server"
 }
