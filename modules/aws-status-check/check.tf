@@ -1,4 +1,5 @@
 variable "fqdn" {}
+// e.g. HTTP or HTTPS (HTTPS is +$2/mo)
 variable "type" {}
 variable "port" {}
 variable "sns_arn" {}
