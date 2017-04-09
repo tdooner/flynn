@@ -1,10 +1,14 @@
+variable "cluster_name_prefix" {
+  default = ""
+}
+
 resource "aws_iam_user" "flynn-backups" {
-  name = "flynn-backups"
+  name = "${var.cluster_name_prefix}flynn-backups"
   path = "/"
 }
 
 resource "aws_iam_policy_attachment" "flynn-backups" {
-  name = "flynn-backups"
+  name = "${var.cluster_name_prefix}flynn-backups"
   users = ["${aws_iam_user.flynn-backups.name}"]
   policy_arn = "${aws_iam_policy.flynn-backups.arn}"
 }
@@ -14,14 +18,14 @@ resource "aws_iam_access_key" "flynn-backups" {
 }
 
 resource "aws_s3_bucket" "flynn-backups" {
-  bucket = "flynn-backups-tdooner"
+  bucket = "${var.cluster_name_prefix}flynn-backups-tdooner"
   acl = "private"
 }
 
 resource "aws_iam_policy" "flynn-backups" {
-  name = "flynn-backups"
+  name = "${var.cluster_name_prefix}flynn-backups"
   path = "/"
-  description = "User to upload flynn backups"
+  description = "User to upload ${var.cluster_name_prefix}flynn backups"
   policy = <<EOF
 {
   "Version": "2012-10-17",
