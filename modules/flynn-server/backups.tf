@@ -1,7 +1,3 @@
-variable "cluster_name_prefix" {
-  default = ""
-}
-
 resource "aws_iam_user" "flynn-backups" {
   name = "${var.cluster_name_prefix}flynn-backups"
   path = "/"
