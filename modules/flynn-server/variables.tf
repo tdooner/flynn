@@ -1,3 +1,11 @@
+///////////////////////////
+// REQUIRED
+///////////////////////////
+variable "ssh_fingerprint" {}
+
+///////////////////////////
+// OPTIONAL
+///////////////////////////
 variable "flynn_version" {
   default = "v20161114.0p1"
 }
@@ -13,4 +21,3 @@ variable "cluster_name_prefix" {
 variable "region" {
   default = "sfo2"
 }
-

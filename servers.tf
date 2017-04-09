@@ -14,8 +14,14 @@ provider "aws" {
   region = "us-east-1"
 }
 
+resource "digitalocean_ssh_key" "flynn" {
+  name = "DigitalOcean Terraform Flynn"
+  public_key = "${trimspace(file("~/.ssh/flynn.pub"))}"
+}
+
 module "flynn-master" {
   source = "./modules/flynn-server"
+  ssh_fingerprint = "${digitalocean_ssh_key.flynn.fingerprint}"
 }
 
 # To upgrade flynn to a new release, uncomment this locally and test everything
@@ -29,6 +35,7 @@ module "flynn-master" {
 # list.
 module "flynn-master-testing" {
   source = "./modules/flynn-server"
+  ssh_fingerprint = "${digitalocean_ssh_key.flynn.fingerprint}"
 
   flynn_version = "v20170321.0"
   cluster_subdomain = "f2"

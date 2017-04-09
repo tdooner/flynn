@@ -3,17 +3,12 @@ variable "volume_id" {
   default = ""
 }
 
-resource "digitalocean_ssh_key" "flynn" {
-  name = "${var.cluster_name_prefix}DigitalOcean Terraform Flynn"
-  public_key = "${trimspace(file("~/.ssh/flynn.pub"))}"
-}
-
 resource "digitalocean_droplet" "flynn-master" {
   image = "ubuntu-16-04-x64"
   name = "${var.cluster_name_prefix}flynn-master-2016-11"
   region = "${var.region}"
   size = "4gb"
-  ssh_keys = ["${digitalocean_ssh_key.flynn.fingerprint}"]
+  ssh_keys = ["${var.ssh_fingerprint}"]
   volume_ids = ["${compact(list("${var.volume_id}"))}"]
 
   connection {
