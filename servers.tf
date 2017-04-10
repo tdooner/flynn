@@ -49,13 +49,3 @@ module "apps" {
 
   mailgun_smtp_password = "${var.mailgun_smtp_password}"
 }
-
-resource "digitalocean_volume" "flynn-data" {
-  // region = "${var.region}"
-  region = "sfo2"
-  // name = "${var.cluster_name_prefix}flynn-data"
-  name = "testing-flynn-data"
-  size = 100
-  // description = "Data for the ${var.cluster_name_prefix}flynn cluster"
-  description = "Data for the testing-flynn cluster"
-}
