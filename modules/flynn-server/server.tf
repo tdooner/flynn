@@ -1,15 +1,17 @@
-// TODO: move this into the module
-variable "volume_id" {
-  default = ""
+resource "digitalocean_volume" "flynn-data" {
+  region = "${var.region}"
+  name = "${var.cluster_name_prefix}flynn-data"
+  size = 100
+  description = "Data for the ${var.cluster_name_prefix}flynn cluster"
 }
 
 resource "digitalocean_droplet" "flynn-master" {
   image = "ubuntu-16-04-x64"
-  name = "${var.cluster_name_prefix}flynn-master-2016-11"
+  name = "${var.cluster_name_prefix}flynn-master-2017-04"
   region = "${var.region}"
   size = "4gb"
   ssh_keys = ["${var.ssh_fingerprint}"]
-  volume_ids = ["${compact(list("${var.volume_id}"))}"]
+  volume_ids = ["${digitalocean_volume.flynn-data.id}"]
 
   connection {
     type = "ssh"
