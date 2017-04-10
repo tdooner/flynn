@@ -41,6 +41,7 @@ wget -O- --quiet https://github.com/rlmcpherson/s3gof3r/releases/download/v0.5.0
   tar xz -C /usr/local/bin --strip-components=1 &&
 chmod +x /usr/local/bin/gof3r &&
 useradd backups -m &&
+echo "${aws_s3_bucket.flynn-backups.bucket}" > ~backups/.s3_bucket_name &&
 echo "${aws_iam_access_key.flynn-backups.id}" > ~backups/.s3_access_key_id &&
 echo "${aws_iam_access_key.flynn-backups.secret}" > ~backups/.s3_secret_access_key &&
 chmod +x /usr/local/bin/take-backup /usr/local/bin/restore-backup
