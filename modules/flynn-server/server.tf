@@ -20,7 +20,7 @@ resource "digitalocean_droplet" "flynn-master" {
 
   provisioner "remote-exec" {
     inline = [
-      "curl -fsSL https://dl.flynn.io/install-flynn | bash -s -- --version ${var.flynn_version}",
+      "curl -fsSL https://dl.flynn.io/install-flynn | bash -s -- --version ${var.flynn_version} --zpool-create-device /dev/sda --zpool-create-options '-f'",
     ]
   }
 
